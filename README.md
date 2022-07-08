@@ -1,5 +1,7 @@
 # fcfs-monkeys
 
+[![CircleCI](https://circleci.com/gh/rycolab/fcfs-monkeys.svg?style=svg&circle-token=dae87df242fd23ebf39ecfdd381274f19da5315b)](https://circleci.com/gh/rycolab/fcfs-monkeys)
+
 This code is used to generate random text with First-come First-serve Monkeys.
 
 ## Dependencies
