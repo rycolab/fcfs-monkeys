@@ -1,4 +1,4 @@
-name: monkeys
+name: fcfs-monkeys
 channels:
   - defaults
   - conda-forge
