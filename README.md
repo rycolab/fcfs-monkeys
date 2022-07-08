@@ -42,6 +42,7 @@ $ make LANGUAGE=<language_code> SEED=<seed>
 ```
 where `language_code` can be any of: `en`, `fi`, `he`, `id`, `pt`, `tr`.
 Similarly, seed is one of: `00`, `01`, `02`, `03`, `04`, `05`, `06`, `07`, `08`, `09`.
+Note that the seed must be written as `0x` (instead of just `x`) for the make command to work.
 
 To run this pipeline for all languages and all seeds, you can use the command:
 ```bash
@@ -62,33 +63,33 @@ To run specific parts of this pipeline see the commands below.
 
 To get both (1) the list of word types for training the graphotactic model; (2) the list of tokens used for our main experiments, run:
 ```bash
-$ make get_wiki LANGUAGE=<language_code>
+$ make get_wiki LANGUAGE=<language_code> SEED=<seed>
 ```
 where `language_code` can be any of: `en`, `fi`, `he`, `id`, `pt`, `tr`.
 
 To get the tokens re-clustered according to the polysemy thresholding strategy (from experiment 2), run:
 ```bash
-$ make get_polysemy LANGUAGE=<language_code>
+$ make get_polysemy LANGUAGE=<language_code> SEED=<seed>
 ```
 
 ### Graphotactics Model Training and Sampling
 
 To train the LSTM graphotactics model and evaluate it, run:
 ```bash
-$ make train LANGUAGE=<language_code>
-$ make eval LANGUAGE=<language_code>
+$ make train LANGUAGE=<language_code> SEED=<seed>
+$ make eval LANGUAGE=<language_code> SEED=<seed>
 ```
 To then sample from it (both with and without repetition), run:
 ```bash
-$ make get_phonotactics LANGUAGE=<language_code>
+$ make get_phonotactics LANGUAGE=<language_code> SEED=<seed>
 ```
 
 ### Assign Wordforms and Get FCFS Full Lexicons
 
 Finally, to assign the sampled wordforms above to their respective natural meanings, run:
 ```bash
-$ make assign_wordforms LANGUAGE=<language_code>
-$ make compile_results LANGUAGE=<language_code>
+$ make assign_wordforms LANGUAGE=<language_code> SEED=<seed>
+$ make compile_results LANGUAGE=<language_code> SEED=<seed>
 ```
 
 ## Repository Structure
