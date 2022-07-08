@@ -1,4 +1,4 @@
-name: fcfs-monkeys
+name: monkeys
 channels:
   - defaults
   - conda-forge
@@ -11,7 +11,7 @@ dependencies:
   - tqdm
   - matplotlib
   - seaborn
-  - pylint
+  - pylint >=2.14.4
   - pip
   - pip:
     - ipdb
