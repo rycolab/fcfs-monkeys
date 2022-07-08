@@ -15,3 +15,14 @@ LANG_NAMES = {
     'yo': 'Yoruba',
 }
 LANGUAGES = ['en', 'fi', 'he', 'id', 'pt', 'tr']
+
+LEGEND_ORDER = {
+    'Natural': 0,
+    'FCFS': 2,
+    'PolyFCFS': 4,
+    'Caplan': 3,
+    'IID': 3,
+    'PolyCaplan': 5,
+    'PolyIID': 5,
+    ' ': 1,
+}

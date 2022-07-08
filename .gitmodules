@@ -1,0 +1,3 @@
+[submodule "wiki-bert"]
+	path = wiki-bert
+	url = git@github.com:tpimentelms/wiki-bert.git

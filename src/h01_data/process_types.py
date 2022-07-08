@@ -1,11 +1,12 @@
+import os
 import sys
 import logging
+import numpy as np
 from tqdm import tqdm
 
-sys.path.append('./src/')
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from h01_data.alphabet import Alphabet
 from h01_data.filter_data import count_sentences
-from h01_data.process_tokens import get_fold_splits
 from util.argparser import get_argparser, parse_args, add_data_args
 from util import util
 
@@ -17,6 +18,15 @@ def get_args():
     argparser.add_argument("--n-folds", type=int, default=10,)
     add_data_args(argparser)
     return parse_args(argparser)
+
+
+def get_fold_splits(n_sentences, n_folds, shuffle_splits=True):
+    splits = np.arange(n_sentences)
+    if shuffle_splits:
+        np.random.shuffle(splits)
+    splits = np.array_split(splits, n_folds)
+    splits = {x: i for i, fold in enumerate(splits) for x in fold}
+    return splits
 
 
 def process_line(line, word_freq, alphabet):

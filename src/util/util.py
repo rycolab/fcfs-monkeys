@@ -77,3 +77,13 @@ def is_file(fname):
 
 def mkdir(folder):
     pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
+
+
+def permutation_test(array, n_permuts=500000):
+    mean = abs(array.mean())
+
+    permuts = np.random.randint(0, 2, size=(n_permuts, array.shape[0])) * 2 - 1
+    permut_means = np.abs((array * permuts).mean(-1))
+    n_larger = (permut_means > mean).sum()
+
+    return (n_larger + 1) / n_permuts

@@ -16,10 +16,10 @@ def add_optimisation_args(parser):
 
 def add_data_args(parser):
     # Data defaults
+    parser.add_argument('--max-train-types', type=int, default=-1)
     parser.add_argument('--data-file', type=str, required=True)
     parser.add_argument('--batch-size', type=int, default=128)
     parser.add_argument('--eval-batch-size', type=int, default=512)
-    parser.add_argument('--dataset', type=str)
 
 
 def add_model_args(parser):
@@ -41,5 +41,8 @@ def get_argparser():
 def parse_args(parser):
     args = parser.parse_args()
     util.config(args.seed)
+
+    if 'max_train_types' in args and args.max_train_types == -1:
+        args.max_train_types = None
 
     return args

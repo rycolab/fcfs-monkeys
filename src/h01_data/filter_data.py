@@ -1,11 +1,12 @@
+import os
 import sys
 import logging
 import string
 from tqdm import tqdm
 
-sys.path.append('./src/')
-from h01_data.language_characters import get_character_set
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from util.argparser import get_argparser, parse_args, add_data_args
+from util.language_characters import get_character_set
 
 
 def get_args():
@@ -30,6 +31,10 @@ def is_allowed(word, char_set):
     return all(char in char_set for char in word.lower())
 
 
+def is_integer(x):
+    return not (x.isdigit() or (x[0] == '-' and x[1:].isdigit()))
+
+
 def get_valid_sentence(line, language):
     # exclude words that contain non-letters
     character_set = get_character_set(language)
@@ -37,7 +42,6 @@ def get_valid_sentence(line, language):
     line = line.translate(str.maketrans('', '', string.punctuation))
     sentence = [word.lower() for word in list(filter(None, line.strip().split(' ')))]
     # remove numbers
-    is_integer = lambda x: not (x.isdigit() or (x[0] == '-' and x[1:].isdigit()))
     sentence = list(filter(is_integer, sentence))
 
     if len(sentence) < 2:
