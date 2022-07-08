@@ -45,7 +45,8 @@ good-names=i,
            f,
            x,
            y,
-           device
+           device,
+           ax
 
 max-args=8
 
