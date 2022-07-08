@@ -27,6 +27,25 @@ $ import nltk
 $ nltk.download('omw-1.4')
 ```
 
+## Analysing results
+
+
+This repository comes equiped with two commands to create the plots in our paper, and to print the main results presented there:
+```bash
+$ make plot_results
+$ make print_results
+```
+
+If someone wants to analyse the created lexicons manually, or their correlations, we have a jupyter notebook which shows how to load them.
+First start a notebook:
+```bash
+$ jupyter notebook
+```
+Then open the files:
+* `scr/h06_results/Notebook_AnalyseLexicons.ipynb`: To load the lexicons for a single language/seed at a time and analyse those results.
+* `scr/h06_results/Notebook_PlotCorrelations.ipynb`: To load the compiled correlations for all languages/seeds and both plot those results and run permutation tests.
+
+
 ## Running the code
 
 ### Getting the data

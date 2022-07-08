@@ -28,13 +28,15 @@ def str_for_table(corr, pvalue):
 
 
 def print_table1(df):
-    table_str = '%s & %s & %s & %s \\\\'
+    table_str = '%s & %s & %s & %s & %s & %s \\\\'
 
     df_mean = df.groupby('language').agg('mean').reset_index()
 
     natural_pvalue = util.permutation_test(df.natural_frequency_corr.to_numpy())
     fcfs_pvalue = util.permutation_test(df.fcfs_frequency_corr.to_numpy())
     polyfcfs_pvalue = util.permutation_test(df.polyfcfs_frequency_corr.to_numpy())
+    caplan_pvalue = util.permutation_test(df.caplan_frequency_corr.to_numpy())
+    polycaplan_pvalue = util.permutation_test(df.polycaplan_frequency_corr.to_numpy())
 
     language = constants.LANG_NAMES[df_mean['language'].item()]
     natural_corr = str_for_table(
@@ -43,8 +45,13 @@ def print_table1(df):
         df_mean['fcfs_frequency_corr'].item(), fcfs_pvalue)
     polyfcfs_corr = str_for_table(
         df_mean['polyfcfs_frequency_corr'].item(), polyfcfs_pvalue)
+    caplan_corr = str_for_table(
+        df_mean['caplan_frequency_corr'].item(), caplan_pvalue)
+    polycaplan_corr = str_for_table(
+        df_mean['polycaplan_frequency_corr'].item(), polycaplan_pvalue)
 
-    print(table_str % (language, natural_corr, fcfs_corr, polyfcfs_corr))
+    print(table_str % (language, natural_corr, fcfs_corr, polyfcfs_corr,
+                       caplan_corr, polycaplan_corr))
 
 
 def print_table2(df):
@@ -78,7 +85,7 @@ def print_table2(df):
 
 
 def print_table3(df):
-    table_str = '%s & %s & %s & %s \\\\'
+    table_str = '%s & %s & %s & %s & %s & %s \\\\'
 
     df_mean = df.groupby('language').agg('mean').reset_index()
 
@@ -86,6 +93,8 @@ def print_table3(df):
     natural_pvalue = util.permutation_test(df.natural_polysemy_corr.to_numpy())
     fcfs_pvalue = util.permutation_test(df.fcfs_polysemy_corr.to_numpy())
     polyfcfs_pvalue = util.permutation_test(df.polyfcfs_polysemy_corr.to_numpy())
+    caplan_pvalue = util.permutation_test(df.caplan_polysemy_corr.to_numpy())
+    polycaplan_pvalue = util.permutation_test(df.polycaplan_polysemy_corr.to_numpy())
 
     language = constants.LANG_NAMES[df_mean['language'].item()]
     natural_polysemy_corr = str_for_table(
@@ -94,8 +103,29 @@ def print_table3(df):
         df_mean['fcfs_polysemy_corr'].item(), fcfs_pvalue)
     polyfcfs_polysemy_corr = str_for_table(
         df_mean['polyfcfs_polysemy_corr'].item(), polyfcfs_pvalue)
+    caplan_polysemy_corr = str_for_table(
+        df_mean['caplan_polysemy_corr'].item(), caplan_pvalue)
+    polycaplan_polysemy_corr = str_for_table(
+        df_mean['polycaplan_polysemy_corr'].item(), polycaplan_pvalue)
 
-    print(table_str % (language, natural_polysemy_corr, fcfs_polysemy_corr, polyfcfs_polysemy_corr))
+    print(table_str % (language, natural_polysemy_corr,
+                       fcfs_polysemy_corr, polyfcfs_polysemy_corr,
+                       caplan_polysemy_corr, polycaplan_polysemy_corr))
+
+
+def print_table4(df):
+    table_str = '%s & %d & %d & %d & %d \\\\'
+
+    df_mean = df.groupby('language').agg('mean').reset_index()
+    language = constants.LANG_NAMES[df_mean['language'].item()]
+
+    n_types_frequency_experiment = df_mean['n_types_frequency_experiment'].item()
+    n_types_wordnet = df_mean['n_types_wordnet'].item()
+    n_types_polysemy_natural = df_mean['n_types_polysemy_natural'].item()
+    n_types_polysemy_polyassign = df_mean['n_types_polysemy_polyassign'].item()
+
+    print(table_str % (language, n_types_frequency_experiment, n_types_wordnet,
+                       n_types_polysemy_natural, n_types_polysemy_polyassign, ))
 
 
 def get_language_results(language, checkpoints_path):
@@ -123,6 +153,7 @@ def print_results(language, checkpoints_path):
     print_table1(df)
     print_table2(df)
     print_table3(df)
+    print_table4(df)
     print()
 
 
