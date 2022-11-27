@@ -55,18 +55,18 @@ def get_frequency_length_correlations(df, df_poly):
                                                     df_iid['caplan_length'], nan_policy='omit')
     df_poly_iid = df_poly.groupby('caplan').agg({'caplan_length': 'mean',
                                                  'frequencies': 'sum'})
-    polycaplan_frequency_correlations = stats.spearmanr(df_poly_iid['frequencies'],
-                                                        df_poly_iid['caplan_length'], nan_policy='omit')
+    polycaplan_frequency_correlations = stats.spearmanr(
+        df_poly_iid['frequencies'], df_poly_iid['caplan_length'], nan_policy='omit')
 
     # iid with low temperature correlations
     df_iid = df.groupby('caplan_low_temperature') \
         .agg({'caplan_low_temperature_length': 'mean', 'frequencies': 'sum'})
-    caplan_low_temp_frequency_correlations = \
-        stats.spearmanr(df_iid['frequencies'], df_iid['caplan_low_temperature_length'], nan_policy='omit')
+    caplan_low_temp_frequency_correlations = stats.spearmanr(
+        df_iid['frequencies'], df_iid['caplan_low_temperature_length'], nan_policy='omit')
     df_poly_iid = df_poly.groupby('caplan_low_temperature') \
         .agg({'caplan_low_temperature_length': 'mean', 'frequencies': 'sum'})
-    polycaplan_low_temp_frequency_correlations = \
-        stats.spearmanr(df_poly_iid['frequencies'], df_poly_iid['caplan_low_temperature_length'], nan_policy='omit')
+    polycaplan_low_temp_frequency_correlations = stats.spearmanr(
+        df_poly_iid['frequencies'], df_poly_iid['caplan_low_temperature_length'], nan_policy='omit')
 
     return natural_frequency_correlations, fcfs_frequency_correlations, \
         polyfcfs_frequency_correlations, caplan_frequency_correlations, \
@@ -88,14 +88,14 @@ def filter_min_count(df_nat, df_polyassign, min_count):
     return df_nat, df_polyassign
 
 
-def merge_homophone_entropy(df, wordform_col='caplan', length_col='caplan_length', polysemy_col='poly_var'):
+def merge_homophone_entropy(df, wordform_col='caplan', length_col='caplan_length',
+                            polysemy_col='poly_var'):
     df = df.copy()
     df['full_frequency'] = df.groupby(wordform_col)['frequencies'].transform('sum')
     df['homophone_probability'] = df['frequencies'] / df['full_frequency']
 
     df['homophone_weighted_polysemy'] = df['homophone_probability'] * df[polysemy_col]
     df['homophone_surprisal'] = - df['homophone_probability'].apply(np.log)
-    # df['homophone_surprisal'] = - df['homophone_probability'].apply(lambda x: np.log(x) if x < 1 else 0)
     df['homophone_weighted_surprisal'] = df['homophone_probability'] * df['homophone_surprisal']
 
     df_iid = df.groupby(wordform_col).agg({length_col: 'mean',
@@ -123,22 +123,25 @@ def get_polysemy_length_correlations(df_nat, df_polyassign,
                                              df_polyassign['fcfs_length'])
 
     # Iid polysemy correlations
-    df_nat_iid = merge_homophone_entropy(df_nat, 'caplan', 'caplan_length', polysemy_col)
-    caplan_polysemy_corr = stats.spearmanr(df_nat_iid[polysemy_col],
-                                           df_nat_iid['caplan_length'], nan_policy='omit')
-    df_polyassign_iid = merge_homophone_entropy(df_polyassign, 'caplan', 'caplan_length', polysemy_col)
-    polycaplan_polysemy_corr = stats.spearmanr(df_polyassign_iid[polysemy_col],
-                                               df_polyassign_iid['caplan_length'], nan_policy='omit')
+    df_nat_iid = merge_homophone_entropy(
+        df_nat, 'caplan', 'caplan_length', polysemy_col)
+    caplan_polysemy_corr = stats.spearmanr(
+        df_nat_iid[polysemy_col], df_nat_iid['caplan_length'], nan_policy='omit')
+    df_polyassign_iid = merge_homophone_entropy(
+        df_polyassign, 'caplan', 'caplan_length', polysemy_col)
+    polycaplan_polysemy_corr = stats.spearmanr(
+        df_polyassign_iid[polysemy_col], df_polyassign_iid['caplan_length'], nan_policy='omit')
 
     # Iid low temperature polysemy correlations
-    df_nat_iid = merge_homophone_entropy(df_nat, 'caplan_low_temperature', 
-                                         'caplan_low_temperature_length', polysemy_col)
+    df_nat_iid = merge_homophone_entropy(
+        df_nat, 'caplan_low_temperature', 'caplan_low_temperature_length', polysemy_col)
     caplan_low_temp_polysemy_corr = stats.spearmanr(
         df_nat_iid[polysemy_col], df_nat_iid['caplan_low_temperature_length'], nan_policy='omit')
-    df_polyassign_iid = merge_homophone_entropy(df_polyassign, 'caplan_low_temperature', 
-                                                'caplan_low_temperature_length', polysemy_col)
+    df_polyassign_iid = merge_homophone_entropy(
+        df_polyassign, 'caplan_low_temperature', 'caplan_low_temperature_length', polysemy_col)
     polycaplan_low_temp_polysemy_corr = stats.spearmanr(
-        df_polyassign_iid[polysemy_col], df_polyassign_iid['caplan_low_temperature_length'], nan_policy='omit')
+        df_polyassign_iid[polysemy_col], df_polyassign_iid['caplan_low_temperature_length'],
+        nan_policy='omit')
 
     return wornet_vs_polysemy_corr, natural_wordnet_len_corr, \
         natural_polysemy_corr, fcfs_polysemy_corr, polyfcfs_polysemy_corr, \
