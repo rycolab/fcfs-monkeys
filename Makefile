@@ -1,19 +1,17 @@
 LANGUAGE := fi
 SEED := 07
 
-MAX_SENTENCES_LARGE := 10000000
+MAX_SENTENCES_LARGE := 20000000
 MAX_SENTENCES := 2000000
-N_TYPES_SENTENCES_FULL := 1000000
-N_TOKENS_SENTENCES_FULL := 1000001
 # MAX_SENTENCES_LARGE := 10000
 # MAX_SENTENCES := 1700
-# N_TYPES_SENTENCES_FULL := 1000
-# N_TOKENS_SENTENCES_FULL := 1001
 N_SEEDS := 10
 
 MAX_TRAIN_TYPES := 10000
 BERT_BATCH_SIZE := 8
 
+FCFS_TEMPERATURE := .5
+IID_TEMPERATURE := 5
 
 DATA_DIR_BASE := ./data
 DATA_DIR_LANG := $(DATA_DIR_BASE)/$(LANGUAGE)
@@ -27,6 +25,7 @@ TOKENIZED_FILE := $(DATA_DIR_LANG)/parsed-wiki40b.txt
 SHUFFLED_LARGE_FILE := $(DATA_DIR_LANG)/shuffled-large.txt
 FILTERED_DATA_FILE := $(DATA_DIR_LANG)/filtered.txt
 SHUFFLED_FILE := $(DATA_DIR_LANG)/shuffled.txt
+SHUFFLED_SPLIT_TEMP_FILE_PREFIX := $(DATA_DIR_LANG)/shuffled-split_temp
 
 TYPE_DATA_FILE_FULL := $(DATA_DIR_LANG)/types.txt
 TOKEN_DATA_FILE_FULL := $(DATA_DIR_LANG)/tokens.txt
@@ -53,6 +52,7 @@ CHECKPOINT_GRAPHOTACTIC_LOGPROBS := $(CHECKPOINT_DIR)/graphotactic-logprobs.pckl
 # Monkey Wordform Samples
 CHECKPOINT_FCFS_SAMPLES := $(CHECKPOINT_DIR)/fcfs_samples.pckl
 CHECKPOINT_CAPLAN_SAMPLES := $(CHECKPOINT_DIR)/caplan_samples.pckl
+CHECKPOINT_CAPLAN_LOW_TEMP_SAMPLES := $(CHECKPOINT_DIR)/caplan_low_temp_samples.pckl
 
 # Codes and Compiled Results
 CHECKPOINT_FREQ_CODES := $(CHECKPOINT_DIR)/codes.tsv
@@ -66,16 +66,18 @@ all: get_wiki get_polysemy train eval get_phonotactics assign_wordforms compile_
 
 print_results:
 	python src/h06_results/print_results.py  --checkpoints-path $(CHECKPOINT_DIR_BASE)
+# 	python src/h06_results/print_results.py  --checkpoints-path $(CHECKPOINT_DIR_BASE) --use-low-temperature
 
 plot_results:
 	mkdir -p $(RESULTS_DIR)
 	python src/h06_results/plot_correlations.py  --checkpoints-path $(CHECKPOINT_DIR_BASE) --results-path $(RESULTS_DIR)
+	python src/h06_results/plot_correlations.py  --checkpoints-path $(CHECKPOINT_DIR_BASE) --results-path $(RESULTS_DIR) --use-low-temperature
 
 compile_results: $(CHECKPOINT_COMPILED_POLYASSIGN_POLYSEMY) $(CHECKPOINT_COMPILED_RESULTS)
 
 assign_wordforms: $(CHECKPOINT_FREQ_CODES)
 
-get_phonotactics: $(CHECKPOINT_FCFS_SAMPLES) $(CHECKPOINT_CAPLAN_SAMPLES)
+get_phonotactics: $(CHECKPOINT_FCFS_SAMPLES) $(CHECKPOINT_CAPLAN_SAMPLES) $(CHECKPOINT_CAPLAN_LOW_TEMP_SAMPLES)
 
 eval: $(CHECKPOINT_GRAPHOTACTIC_LOGPROBS)
 
@@ -86,7 +88,7 @@ get_polysemy: $(EMB_DATA_DIR) $(CHECKPOINT_PCA_FILE) \
 
 get_wiki_seed: $(PROCESSED_TYPE_FILE) $(PROCESSED_TOKEN_FILE)
 
-get_wiki: $(SHUFFLED_FILE) $(TYPE_DATA_FILE_FULL) $(TOKEN_DATA_FILE_FULL) $(TYPE_DATA_FILE) $(TOKEN_DATA_FILE)
+get_wiki: $(SHUFFLED_FILE) $(TOKEN_DATA_FILE_FULL) $(TYPE_DATA_FILE) $(TOKEN_DATA_FILE)
 
 clean:
 	rm $(PROCESSED_TYPE_FILE) $(PROCESSED_TOKEN_FILE)
@@ -104,31 +106,40 @@ $(CHECKPOINT_COMPILED_RESULTS):
 $(CHECKPOINT_COMPILED_POLYASSIGN_POLYSEMY):
 	python src/h05_analysis/compile_polysemy.py --seed $(SEED) \
 			--fcfs-samples-file $(CHECKPOINT_FCFS_SAMPLES)  --caplan-samples-file $(CHECKPOINT_CAPLAN_SAMPLES) \
+			--caplan-low-temperature-samples-file $(CHECKPOINT_CAPLAN_LOW_TEMP_SAMPLES) \
 			--results-ent-polyassign-file $(CHECKPOINT_ENTROPY_POLYASSIGN) \
 			--results-ent-natural-file $(CHECKPOINT_ENTROPY_NATURAL) \
 			--results-compiled-polyassign-file $(CHECKPOINT_COMPILED_POLYASSIGN_POLYSEMY) \
 			--results-compiled-natural-file $(CHECKPOINT_COMPILED_NATURAL_POLYSEMY)
 
-
 $(CHECKPOINT_FREQ_CODES): $(CHECKPOINT_GRAPHOTACTIC_FILE) $(CHECKPOINT_FCFS_SAMPLES)
 	python src/h05_analysis/assign_wordforms.py --seed $(SEED)  \
 			--fcfs-samples-file $(CHECKPOINT_FCFS_SAMPLES)  --caplan-samples-file $(CHECKPOINT_CAPLAN_SAMPLES) \
+			--caplan-low-temperature-samples-file $(CHECKPOINT_CAPLAN_LOW_TEMP_SAMPLES) \
 			--tokens-file $(PROCESSED_TOKEN_FILE) --results-file $(CHECKPOINT_FREQ_CODES)
+
+####### Sample wordforms #######
 
 $(CHECKPOINT_FCFS_SAMPLES): | $(CHECKPOINT_GRAPHOTACTIC_FILE) $(PROCESSED_TOKEN_FILE) $(CHECKPOINT_TYPE_POLYSEMY)
 	python src/h05_analysis/sample_phonotactics.py --seed $(SEED) \
 			--checkpoint-path $(CHECKPOINT_DIR) --samples-file $(CHECKPOINT_FCFS_SAMPLES) \
 			--tokens-file $(PROCESSED_TOKEN_FILE) --types-file $(PROCESSED_TYPE_FILE) \
-			--polyassign-code-file $(CHECKPOINT_POLYASSIGN_CODE)
+			--polyassign-code-file $(CHECKPOINT_POLYASSIGN_CODE) --temperature $(FCFS_TEMPERATURE)
 
 $(CHECKPOINT_CAPLAN_SAMPLES): | $(CHECKPOINT_GRAPHOTACTIC_FILE) $(PROCESSED_TOKEN_FILE) $(CHECKPOINT_TYPE_POLYSEMY)
 	python src/h05_analysis/sample_phonotactics.py --seed $(SEED) --with-repetition \
 			--checkpoint-path $(CHECKPOINT_DIR) --samples-file $(CHECKPOINT_CAPLAN_SAMPLES) \
 			--tokens-file $(PROCESSED_TOKEN_FILE) --types-file $(PROCESSED_TYPE_FILE) \
-			--polyassign-code-file $(CHECKPOINT_POLYASSIGN_CODE)
+			--polyassign-code-file $(CHECKPOINT_POLYASSIGN_CODE) --temperature $(IID_TEMPERATURE)
+
+$(CHECKPOINT_CAPLAN_LOW_TEMP_SAMPLES): | $(CHECKPOINT_GRAPHOTACTIC_FILE) $(PROCESSED_TOKEN_FILE) $(CHECKPOINT_TYPE_POLYSEMY)
+	python src/h05_analysis/sample_phonotactics.py --seed $(SEED) --with-repetition \
+			--checkpoint-path $(CHECKPOINT_DIR) --samples-file $(CHECKPOINT_CAPLAN_LOW_TEMP_SAMPLES) \
+			--tokens-file $(PROCESSED_TOKEN_FILE) --types-file $(PROCESSED_TYPE_FILE) \
+			--polyassign-code-file $(CHECKPOINT_POLYASSIGN_CODE) --temperature $(FCFS_TEMPERATURE)
 
 
-####### Train and Evaluate Graphotactic Model ##########
+####### Train and Evaluate Graphotactic Model #######
 
 # Eval type lstm models
 $(CHECKPOINT_GRAPHOTACTIC_LOGPROBS): | $(CHECKPOINT_GRAPHOTACTIC_FILE)
@@ -194,11 +205,10 @@ $(TYPE_DATA_FILE): | $(TYPE_DATA_FILE_FULL)
 $(TOKEN_DATA_FILE): | $(TOKEN_DATA_FILE_FULL)
 	split -n r/$(N_SEEDS) $(TOKEN_DATA_FILE_FULL) $(TOKEN_DATA_FILE_PREFIX) -da 2 --additional-suffix=$(DATA_FILES_SUFFIX)
 
-$(TYPE_DATA_FILE_FULL): | $(SHUFFLED_FILE)
-	head -n $(N_TYPES_SENTENCES_FULL) $(SHUFFLED_FILE) > $(TYPE_DATA_FILE_FULL)
-
 $(TOKEN_DATA_FILE_FULL): | $(SHUFFLED_FILE)
-	tail -n +$(N_TOKENS_SENTENCES_FULL) $(SHUFFLED_FILE) > $(TOKEN_DATA_FILE_FULL)
+	split -n r/2 $(SHUFFLED_FILE) $(SHUFFLED_SPLIT_TEMP_FILE_PREFIX) -da 1
+	mv $(SHUFFLED_SPLIT_TEMP_FILE_PREFIX)0 $(TYPE_DATA_FILE_FULL)
+	mv $(SHUFFLED_SPLIT_TEMP_FILE_PREFIX)1 $(TOKEN_DATA_FILE_FULL)
 
 # Shuffle Data
 $(SHUFFLED_FILE): | $(FILTERED_DATA_FILE)
