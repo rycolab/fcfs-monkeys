@@ -11,7 +11,8 @@ dependencies:
   - tqdm
   - matplotlib
   - seaborn
-  - pylint >=2.14.4
+  - jupyterlab
+  - pylint
   - pip
   - pip:
     - ipdb
