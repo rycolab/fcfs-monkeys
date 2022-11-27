@@ -20,6 +20,7 @@ def get_args():
     argparser.add_argument('--polyassign-code-file', type=str, required=True)
     argparser.add_argument('--samples-file', type=str, required=True)
     argparser.add_argument('--with-repetition', action='store_true', default=False)
+    argparser.add_argument('--temperature', type=float, required=True)
     return parse_args(argparser)
 
 
@@ -59,14 +60,14 @@ class SampleList:
         return len(self.samples)
 
 
-def get_samples(model, n_samples, alphabet, with_repetition=False):
+def get_samples(model, n_samples, alphabet, temperature, with_repetition=False):
     sampling_rate = 1000
     samples = SampleList(with_repetition=with_repetition)
 
     print('Sampling %d instances' % n_samples)
     with tqdm(total=n_samples) as pbar:
         while len(samples) < n_samples:
-            new_samples = model.sample(alphabet, sampling_rate)
+            new_samples = model.sample(alphabet, sampling_rate, temperature=temperature)
             samples.append(new_samples)
 
             avg_length = sum(len(x) for x in samples) / len(samples)
@@ -93,7 +94,8 @@ def main():
     print('Unique Natural Types: %d\tUnique Polysemy types: %d' % (n_tokens, n_poly))
     n_samples = max(n_tokens, n_poly)
 
-    samples = get_samples(model, n_samples, alphabet, with_repetition=args.with_repetition)
+    samples = get_samples(model, n_samples, alphabet, temperature=args.temperature,
+                          with_repetition=args.with_repetition)
 
     util.write_data(args.samples_file, samples)
 

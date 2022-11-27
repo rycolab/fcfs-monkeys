@@ -11,6 +11,7 @@ def get_args():
     argparser = get_argparser()
     argparser.add_argument('--fcfs-samples-file', type=str, required=True)
     argparser.add_argument('--caplan-samples-file', type=str, required=True)
+    argparser.add_argument('--caplan-low-temperature-samples-file', type=str, required=True)
     argparser.add_argument('--tokens-file', type=str, required=True)
     argparser.add_argument('--results-file', type=str, required=True)
 
@@ -38,9 +39,14 @@ def main():
     caplan_samples = util.read_data(args.caplan_samples_file)
     df['caplan'] = df.idx.apply(lambda x: caplan_samples[x])
 
+    # Caplan et al's monkey model with low temperatures
+    caplan_low_temp_samples = util.read_data(args.caplan_low_temperature_samples_file)
+    df['caplan_low_temperature'] = df.idx.apply(lambda x: caplan_low_temp_samples[x])
+
     df['natural_length'] = df.natural.apply(len)
     df['fcfs_length'] = df.fcfs.apply(len)
     df['caplan_length'] = df.caplan.apply(len)
+    df['caplan_low_temperature_length'] = df.caplan_low_temperature.apply(len)
 
     df.to_csv(args.results_file, sep='\t')
 
