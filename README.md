@@ -17,7 +17,7 @@ $ source activate.sh
 
 Now install the appropriate version of pytorch and the transformers library:
 ```bash
-$ conda install pytorch torchvision torchaudio cudatoolkit=10.1 -c pytorch -c conda-forge
+$ conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
 $ # conda install pytorch torchvision torchaudio cpuonly -c pytorch -c conda-forge
 $ pip install transformers
 ```
@@ -44,6 +44,7 @@ $ jupyter notebook
 Then open the files:
 * `scr/h06_results/Notebook_AnalyseLexicons.ipynb`: To load the lexicons for a single language/seed at a time and analyse those results.
 * `scr/h06_results/Notebook_PlotCorrelations.ipynb`: To load the compiled correlations for all languages/seeds and both plot those results and run permutation tests.
+* `scr/h06_results/Notebook_AnalyseHomophony.ipynb`: To analyse the number of homophonous words per simulated language, as well as the average and maximum number of homphones each wordform has.
 
 
 ## Running the code
